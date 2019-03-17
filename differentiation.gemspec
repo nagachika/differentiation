@@ -2,17 +2,17 @@
 
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'differential/version'
+require 'differentiation/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "differential"
-  spec.version       = Differential::VERSION
+  spec.name          = "differentiation"
+  spec.version       = Differentiation::VERSION
   spec.authors       = ["nagachika"]
   spec.email         = ["nagachika@ruby-lang.org"]
 
   spec.summary       = %q{Make Ruby Differentiable.}
-  spec.description   = %q{differential.gem implement a kind of Automatic differentiation algorithm. It can convert Method/Proc to differential version.}
-  spec.homepage      = "https://github.com/nagachika/differential"
+  spec.description   = %q{differentiation.gem implement a kind of Automatic differentiation algorithm. It can convert Method/Proc to differentiable version.}
+  spec.homepage      = "https://github.com/nagachika/differentiation"
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   spec.bindir        = "exe"

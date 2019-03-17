@@ -1,6 +1,6 @@
 # fronzen_string_literal: true
 
-module Differential
+module Differentiation
 
   def self.differentiable?(o)
     # TODO: support Vector and Matrix
@@ -36,9 +36,9 @@ module Differential
     end
     f_prime = lambda {|*args, **kwargs|
       args.map!.with_index do |a, i|
-        Differential.convert_to_dual_number(a, key: positional[i])
+        Differentiation.convert_to_dual_number(a, key: positional[i])
       end
-      kwargs = Hash[kwargs.map{|k,v| [k, Differential.convert_to_dual_number(v, key: k)] }]
+      kwargs = Hash[kwargs.map{|k,v| [k, Differentiation.convert_to_dual_number(v, key: k)] }]
       if kwargs.empty?
         f.call(*args)
       else
@@ -78,7 +78,7 @@ module Differential
     end
 
     def coerce(other)
-      if Differential.differentiable?(other)
+      if Differentiation.differentiable?(other)
         [DualNumber.new(other), self]
       else
         super
@@ -150,5 +150,5 @@ module Differential
   end
 end
 
-require "differential/ext/kernel"
+require "differentiation/ext/kernel"
 

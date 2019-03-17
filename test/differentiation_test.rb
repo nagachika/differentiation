@@ -1,15 +1,15 @@
 require "test_helper"
 
-class DifferentialTest < Test::Unit::TestCase
+class DifferentiationTest < Test::Unit::TestCase
 
   def assert_differential(f, args, kwargs, y, gradients)
-    f_d = Differential.differential(f)
+    f_d = Differentiation.differential(f)
     if kwargs.empty?
       result = f_d.call(*args)
     else
       result = f_d.call(*args, **kwargs)
     end
-    assert_equal(Differential::DualNumber, result.class)
+    assert_equal(Differentiation::DualNumber, result.class)
     assert_equal(y, result.n)
     assert_equal(gradients, result.gradients(*gradients.keys))
   end

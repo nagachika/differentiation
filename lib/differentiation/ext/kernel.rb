@@ -9,7 +9,7 @@ module Kernel
     else
       raise TypeError, "differential requires Method/Proc/Symbol argument."
     end
-    f = Differential.differential(f)
+    f = Differentiation.differential(f)
     if m.is_a?(Symbol)
       if self.is_a?(Module)
         self.define_method(m, f)
