@@ -50,4 +50,23 @@ class DifferentiationTest < Test::Unit::TestCase
       [1.0, 2.0], {},
       0.0, { x: 0.0, y: 2.0 })
   end
+
+  def test_relu
+    assert_differential(
+      lambda{|x| x > 0 ? x : 0.0 },
+      [1.0], {},
+      1.0, { x: 1.0 })
+    assert_differential(
+      lambda{|x| x > 0 ? x : 0.0 },
+      [-1.0], {},
+      0.0, { x: 0.0 })
+    assert_differential(
+      lambda{|x| [x, 0.0].max },
+      [1.0], {},
+      1.0, { x: 1.0 })
+    assert_differential(
+      lambda{|x| [x, 0.0].max },
+      [-11.0], {},
+      0.0, { x: 0.0 })
+  end
 end

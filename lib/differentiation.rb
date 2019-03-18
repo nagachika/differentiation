@@ -40,14 +40,16 @@ module Differentiation
       end
       kwargs = Hash[kwargs.map{|k,v| [k, Differentiation.convert_to_dual_number(v, key: k)] }]
       if kwargs.empty?
-        f.call(*args)
+        Differentiation.convert_to_dual_number(f.call(*args))
       else
-        f.call(*args, **kwargs)
+        Differentiation.convert_to_dual_number(f.call(*args, **kwargs))
       end
     }
   end
 
   class DualNumber
+    include Comparable
+
     def initialize(n, diff=lambda{|_| 0})
       @n = n
       @diff = diff
@@ -82,6 +84,14 @@ module Differentiation
         [DualNumber.new(other), self]
       else
         super
+      end
+    end
+
+    def <=>(other)
+      if other.is_a?(DualNumber)
+        @n <=> other.n
+      else
+        @n <=> other
       end
     end
 
