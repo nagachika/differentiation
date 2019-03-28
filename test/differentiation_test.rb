@@ -69,4 +69,15 @@ class DifferentiationTest < Test::Unit::TestCase
       [-11.0], {},
       0.0, { x: 0.0 })
   end
+
+  def test_power
+    assert_differential(
+      lambda{|x| (x - 2.0) ** 2 },
+      [1.0], {},
+      1.0, { x: -2.0 })
+    assert_differential(
+      lambda{|x, y| ((x - 2.0) ** 2) * ((y + 1.0) ** 2) },
+      [0.0, 0.0], {},
+      4.0, { x: -4.0, y: 8.0 })
+  end
 end

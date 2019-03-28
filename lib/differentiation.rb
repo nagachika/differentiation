@@ -142,10 +142,10 @@ module Differentiation
     def **(other)
       if other.is_a?(DualNumber)
         n = @n ** other.n
-        diff = ->(key) { (@n ** other.n) * (other.diff(key) * Math.log(@n) + (other.n / @n)) }
+        diff = ->(key) { (@n ** other.n) * (other.diff.call(key) * Math.log(@n) + (other.n / @n)) }
       else
         n = @n ** other
-        diff = ->(key) { (@n ** (other-1)) * other }
+        diff = ->(key) { ((@n ** (other-1)) * other) * @diff.call(key) }
       end
       DualNumber.new(n, diff)
     end
