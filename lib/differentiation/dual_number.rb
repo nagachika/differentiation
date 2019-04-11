@@ -6,20 +6,63 @@ module Differentiation
   class DualNumber
     include Comparable
 
-    def initialize(n, diff=lambda{|_| 0})
+    def initialize(n, diff=lambda{|var| var.equal?(self) ? 1.0 : 0.0 }, named_variables: {}, key: nil)
       @n = n
       @diff = diff
+      if key
+        @named_variables = { key => self }.freeze
+      else
+        @named_variables = named_variables.dup.freeze
+      end
     end
 
-    attr_reader :n, :diff
+    attr_reader :n, :diff, :named_variables
 
-    def derivative(key)
-      @diff.call(key)
+    def derivative(var)
+      if var.equal?(self)
+        1.0
+      else
+        @diff.call(var)
+      end
     end
 
     def gradients(*keys)
-      keys.each_with_object({}) do |k, o|
-        o[k] = @diff.call(k)
+      keys = keys.flatten(1)
+      return_hash = false
+      if keys.empty?
+        return_hash = true
+        keys = @named_variables.keys
+        vars = @named_variables.values
+      else
+        vars = keys.map do |k|
+          if k.is_a?(DualNumber) or (defined?(::Matrix) and k.is_a?(Matrix))
+            k
+          else
+            @named_variables[k]
+          end
+        end
+      end
+      if return_hash
+        keys.each_with_object({}) do |k, o|
+          v = @named_variables[k]
+          if v.nil?
+            o[k] = 0.0
+          elsif defined?(::Matrix) and v.is_a?(::Matrix)
+            o[k] = Matrix.build(v.row_size, v.column_size){|i, j| derivative(v[i, j]) }
+          else
+            o[k] = derivative(v)
+          end
+        end
+      else
+        vars.map do |v|
+          if v.nil?
+            0.0
+          elsif defined?(::Matrix) and v.is_a?(::Matrix)
+            Matrix.build(v.row_size, v.column_size){|i, j| derivative(v[i, j]) }
+          else
+            derivative(v)
+          end
+        end
       end
     end
 
@@ -37,7 +80,7 @@ module Differentiation
 
     def coerce(other)
       if Differentiation.differentiable?(other)
-        [DualNumber.new(other), self]
+        [Differentiation.convert_to_dual_number(other), self]
       else
         super
       end
@@ -54,56 +97,66 @@ module Differentiation
     def +(other)
       if other.is_a?(DualNumber)
         n = @n + other.n
-        diff = ->(key) { @diff.call(key) + other.diff.call(key) }
+        diff = ->(var) { self.derivative(var) + other.derivative(var) }
+        named_variables = @named_variables.merge(other.named_variables)
       else
         n = @n + other
         diff = @diff
+        named_variables = @named_variables
       end
-      DualNumber.new(n, diff)
+      DualNumber.new(n, diff, named_variables: named_variables)
     end
 
     def -(other)
       if other.is_a?(DualNumber)
         n = @n - other.n
-        diff = ->(key) { @diff.call(key) - other.diff.call(key) }
+        diff = ->(var) { self.derivative(var) - other.derivative(var) }
+        named_variables = @named_variables.merge(other.named_variables)
       else
         n = @n - other
         diff = @diff
+        named_variables = @named_variables
       end
-      DualNumber.new(n, diff)
+      DualNumber.new(n, diff, named_variables: named_variables)
     end
 
     def *(other)
       if other.is_a?(DualNumber)
         n = @n * other.n
-        diff = ->(key) { @n * other.diff.call(key) + @diff.call(key) * other.n }
+        diff = ->(var) { @n * other.derivative(var) + self.derivative(var) * other.n }
+        named_variables = @named_variables.merge(other.named_variables)
       else
         n = @n * other
-        diff = ->(key) { @diff.call(key) * other }
+        diff = ->(var) { self.derivative(var) * other }
+        named_variables = @named_variables
       end
-      DualNumber.new(n, diff)
+      DualNumber.new(n, diff, named_variables: named_variables)
     end
 
     def /(other)
       if other.is_a?(DualNumber)
         n = @n / other.n
-        diff = ->(key) { (@diff.call(key) / other) + (@n * other.diff.call(key)) / (other.n ** 2) }
+        diff = ->(var) { (self.derivative(var) / other) + (@n * other.derivative(var)) / (other.n ** 2) }
+        named_variables = @named_variables.merge(other.named_variables)
       else
         n = @n / other
-        diff = ->(key) { @diff.call(key) / other }
+        diff = ->(var) { self.derivative(var) / other }
+        named_variables = @named_variables
       end
-      DualNumber.new(n, diff)
+      DualNumber.new(n, diff, named_variables: named_variables)
     end
 
     def **(other)
       if other.is_a?(DualNumber)
         n = @n ** other.n
-        diff = ->(key) { (@n ** other.n) * (other.diff.call(key) * Math.log(@n) + (other.n / @n)) }
+        diff = ->(var) { (@n ** other.n) * (other.derivative(var) * Math.log(@n) + (other.n / @n)) }
+        named_variables = @named_variables.merge(other.named_variables)
       else
         n = @n ** other
-        diff = ->(key) { ((@n ** (other-1)) * other) * @diff.call(key) }
+        diff = ->(var) { ((@n ** (other-1)) * other) * self.derivative(var) }
+        named_variables = @named_variables
       end
-      DualNumber.new(n, diff)
+      DualNumber.new(n, diff, named_variables: named_variables)
     end
 
     def inspect

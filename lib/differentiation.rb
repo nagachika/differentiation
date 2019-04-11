@@ -5,15 +5,32 @@ require "differentiation/dual_number"
 module Differentiation
 
   def self.differentiable?(o)
-    # TODO: support Vector and Matrix
-    o.is_a?(Numeric)
+    o.is_a?(Numeric) or (defined?(Matrix) and o.is_a?(Matrix))
   end
 
-  def self.convert_to_dual_number(o, key: nil)
+  def self.convert_to_dual_number(o, key: nil, named_variables: {})
     if o.is_a?(DualNumber)
-      o
+      if key and o.named_variables.empty?
+        DualNumber.new(o.n, o.diff, key: key)
+      else
+        o
+      end
     elsif differentiable?(o)
-      DualNumber.new(o, lambda{|_key| _key == key ? 1 : 0})
+      if defined?(Matrix) and o.is_a?(Matrix)
+        if key
+          vars = Matrix.build(o.row_size, o.column_size){ nil }
+          named_variables = { key => vars }
+        end
+        Matrix.build(o.row_size, o.column_size) do |i, j|
+          v = self.convert_to_dual_number(o[i, j], named_variables: named_variables)
+          if key
+            vars.__send__(:[]=, i, j, v)
+          end
+          v
+        end
+      else
+        DualNumber.new(o, key: key, named_variables: named_variables)
+      end
     else
       o
     end
@@ -51,4 +68,6 @@ module Differentiation
 end
 
 require "differentiation/ext/kernel"
+require "differentiation/ext/integer"
+require "differentiation/ext/float"
 

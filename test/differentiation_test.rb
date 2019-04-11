@@ -2,16 +2,21 @@ require "test_helper"
 
 class DifferentiationTest < Test::Unit::TestCase
 
-  def assert_differential(f, args, kwargs, y, gradients)
+  def assert_differential(f, args, kwargs, y, gradients, keys=[])
     f_d = Differentiation.differential(f)
     if kwargs.empty?
       result = f_d.call(*args)
     else
-      result = f_d.call(*args, **kwargs)
+      aesult = f_d.call(*args, **kwargs)
     end
     assert_equal(Differentiation::DualNumber, result.class)
     assert_equal(y, result.n)
-    assert_equal(gradients, result.gradients(*gradients.keys))
+    assert_equal(gradients, result.gradients(keys))
+  end
+
+  def test_non_differential
+    o = Object.new
+    assert_equal(o, Differentiation.convert_to_dual_number(o))
   end
 
   def test_integer_polynomial
@@ -51,6 +56,17 @@ class DifferentiationTest < Test::Unit::TestCase
       0.0, { x: 0.0, y: 2.0 })
   end
 
+  def test_divide
+    assert_differential(
+      lambda{|x, y| x / y },
+      [1.0, 2.0], {},
+      0.5, { x: 0.5, y: 0.25 })
+    assert_differential(
+      lambda{|x| x / 2 },
+      [1.0], {},
+      0.5, { x: 0.5 })
+  end
+
   def test_relu
     assert_differential(
       lambda{|x| x > 0 ? x : 0.0 },
@@ -59,7 +75,11 @@ class DifferentiationTest < Test::Unit::TestCase
     assert_differential(
       lambda{|x| x > 0 ? x : 0.0 },
       [-1.0], {},
-      0.0, { x: 0.0 })
+      0.0, { })
+    assert_differential(
+      lambda{|x| x > 0 ? x : 0.0 },
+      [-1.0], {},
+      0.0, [0.0], [:x])
     assert_differential(
       lambda{|x| [x, 0.0].max },
       [1.0], {},
@@ -67,7 +87,11 @@ class DifferentiationTest < Test::Unit::TestCase
     assert_differential(
       lambda{|x| [x, 0.0].max },
       [-11.0], {},
-      0.0, { x: 0.0 })
+      0.0, { })
+    assert_differential(
+      lambda{|x| [x, 0.0].max },
+      [-11.0], {},
+      0.0, [0.0], [:x])
   end
 
   def test_power
