@@ -7,7 +7,7 @@ class DifferentiationTest < Test::Unit::TestCase
     if kwargs.empty?
       result = f_d.call(*args)
     else
-      aesult = f_d.call(*args, **kwargs)
+      result = f_d.call(*args, **kwargs)
     end
     assert_equal(Differentiation::DualNumber, result.class)
     assert_equal(y, result.n)
@@ -103,5 +103,12 @@ class DifferentiationTest < Test::Unit::TestCase
       lambda{|x, y| ((x - 2.0) ** 2) * ((y + 1.0) ** 2) },
       [0.0, 0.0], {},
       4.0, { x: -4.0, y: 8.0 })
+  end
+
+  def test_differential_with_kwargs
+    assert_differential(
+      lambda{|x: 0.0, y: 0.0| (x + 1) * (y - 2) },
+      [], {x: 1.0, y: 2.0},
+      0.0, { x: 0.0, y: 2.0 })
   end
 end
