@@ -37,7 +37,7 @@ module Differentiation
   end
 
   def self.differential(f)
-    unless f.is_a?(Proc) or f.is_a?(Method)
+    unless f.is_a?(Proc) or f.is_a?(Method) or f.is_a?(UnboundMethod)
       raise TypeError, "Only Proc or Method can be differentiable"
     end
 
@@ -54,6 +54,9 @@ module Differentiation
       end
     end
     f_prime = lambda {|*args, **kwargs|
+      if f.is_a?(UnboundMethod)
+        f = f.bind(self)
+      end
       args.map!.with_index do |a, i|
         Differentiation.convert_to_dual_number(a, key: positional[i])
       end

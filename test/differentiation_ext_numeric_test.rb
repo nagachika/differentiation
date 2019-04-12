@@ -1,6 +1,6 @@
 require "test_helper"
 
-class DifferentiationTest < Test::Unit::TestCase
+class DifferentiationExtNumericTest < Test::Unit::TestCase
 
   def test_integer_to_dual_number
     n = 0.to_dual_number
