@@ -1,7 +1,5 @@
 # fronzen_string_literal: true
 
-require "differentiation/dual_number"
-
 module Differentiation
   class DualNumber
     include Comparable
