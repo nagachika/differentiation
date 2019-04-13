@@ -73,4 +73,4 @@ end
 require "differentiation/ext/kernel"
 require "differentiation/ext/integer"
 require "differentiation/ext/float"
-
+require "differentiation/ext/math"
