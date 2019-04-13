@@ -55,6 +55,50 @@ class DifferentiationDualNumberTest < Test::Unit::TestCase
     assert_equal({ m: Matrix[[0.0, 0.0], [0.0, 2.0]]}, result[1, 1].gradients)
   end
 
+  def test_dual_plus
+    x = 2.0.to_dual_number
+    y = 1.0.to_dual_number
+    r = x + y
+    assert_instance_of(Differentiation::DualNumber, r)
+    assert_instance_of(Float, r.n)
+    assert_instance_of(Float, r.gradients(x)[0])
+    assert_instance_of(Float, r.gradients(y)[0])
+    assert_equal([1.0, 1.0], r.gradients(x, y))
+  end
+
+  def test_dual_minus
+    x = 2.0.to_dual_number
+    y = 1.0.to_dual_number
+    r = x - y
+    assert_instance_of(Differentiation::DualNumber, r)
+    assert_instance_of(Float, r.n)
+    assert_instance_of(Float, r.gradients(x)[0])
+    assert_instance_of(Float, r.gradients(y)[0])
+    assert_equal([1.0, -1.0], r.gradients(x, y))
+  end
+
+  def test_dual_mul
+    x = 2.0.to_dual_number
+    y = 1.0.to_dual_number
+    r = x * y
+    assert_instance_of(Differentiation::DualNumber, r)
+    assert_instance_of(Float, r.n)
+    assert_instance_of(Float, r.gradients(x)[0])
+    assert_instance_of(Float, r.gradients(y)[0])
+    assert_equal([1.0, 2.0], r.gradients(x, y))
+  end
+
+  def test_dual_divide
+    x = 2.0.to_dual_number
+    y = 1.0.to_dual_number
+    r = x / y
+    assert_instance_of(Differentiation::DualNumber, r)
+    assert_instance_of(Float, r.n)
+    assert_instance_of(Float, r.gradients(x)[0])
+    assert_instance_of(Float, r.gradients(y)[0])
+    assert_equal([1.0, 2.0], r.gradients(x, y))
+  end
+
   def test_dual_number_to_i
     assert_instance_of(Integer, 1.to_dual_number.to_i)
   end
