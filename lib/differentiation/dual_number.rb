@@ -92,6 +92,14 @@ module Differentiation
       end
     end
 
+    def +@
+      self
+    end
+
+    def -@
+      self * -1
+    end
+
     def +(other)
       if other.is_a?(DualNumber)
         n = @n + other.n
