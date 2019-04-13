@@ -114,7 +114,7 @@ class DifferentiationDualNumberTest < Test::Unit::TestCase
     assert_instance_of(Float, r.n)
     assert_instance_of(Float, r.gradients(x)[0])
     assert_instance_of(Float, r.gradients(y)[0])
-    assert_equal([1.0, 2.0], r.gradients(x, y))
+    assert_equal([1.0, -2.0], r.gradients(x, y))
   end
 
   def test_dual_number_to_i

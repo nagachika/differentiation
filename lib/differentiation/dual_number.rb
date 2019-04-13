@@ -142,7 +142,7 @@ module Differentiation
     def /(other)
       if other.is_a?(DualNumber)
         n = @n / other.n
-        diff = ->(var) { (self.derivative(var) / other.n) + (@n * other.derivative(var)) / (other.n ** 2) }
+        diff = ->(var) { (self.derivative(var) / other.n) - (@n * other.derivative(var)) / (other.n ** 2) }
         named_variables = @named_variables.merge(other.named_variables)
       else
         n = @n / other

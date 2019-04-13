@@ -60,7 +60,7 @@ class DifferentiationTest < Test::Unit::TestCase
     assert_differential(
       lambda{|x, y| x / y },
       [1.0, 2.0], {},
-      0.5, { x: 0.5, y: 0.25 })
+      0.5, { x: 0.5, y: -0.25 })
     assert_differential(
       lambda{|x| x / 2 },
       [1.0], {},
